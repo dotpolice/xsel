@@ -336,6 +336,25 @@ gotpw:
 }
 
 /*
+ * get_datadir ()
+ *
+ * Get the user's config directory.
+ */
+static char *
+get_datadir (void)
+{
+  uid_t uid;
+  char * username, * datadir;
+  struct passwd * pw;
+
+  if ((datadir = getenv ("XDG_DATA_HOME")) != NULL) {
+    return datadir;
+  }
+
+  return get_homedir();
+}
+
+/*
  * become_daemon ()
  *
  * Perform the required procedure to become a daemon process, as
@@ -349,17 +368,19 @@ become_daemon (void)
   pid_t pid;
   int null_r_fd, null_w_fd, log_fd;
   char * homedir;
+  char * datadir;
 
   if (no_daemon) return;
 
   homedir = get_homedir ();
+  datadir = get_datadir ();
 
   /* Check that we can open a logfile before continuing */
 
   /* If the user has specified a --logfile, use that ... */
   if (logfile[0] == '\0') {
     /* ... otherwise use the default logfile */
-    snprintf (logfile, MAXFNAME, "%s/.xsel.log", homedir);
+    snprintf (logfile, MAXFNAME, "%s/xsel.log", datadir);
   }
 
   /* Make sure to create the logfile with sane permissions */
